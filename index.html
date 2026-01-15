@@ -1,11 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-   <meta charset="UTF-8">
-   <title>Title</title>
-</head>
-<body>
- <canvas id="canvas" style="background-color: black"></canvas>
-</body>
-<script src="index.js"></script>
+   <head>
+      <meta charset="UTF-8">
+      <title>Title</title>
+   </head>
+   <body>
+      <h1>Perlin Noise Generator</h1>
+      <h2>Size</h2>
+      <label for="xsize">X Size</label>
+      <input type="number" id="xsize" value="200"><br>
+      <label for="ysize">Y Size</label>
+      <input type="number" id="ysize" value="200"><br>
+      <label for="frq">Frequency (Size of each grid square)</label>
+      <input type="number" id="frq" value="20"><br>
+
+      <h2>Seed</h2>
+      <input type="radio" name="seedtype" id="rand" checked>Random Seed<br>
+      <input type="radio" name="seedtype" id="set">Set Seed <input type="number" id="seed" value="123456"><br>
+
+      <h2>Color</h2>
+      <input type="radio" name="colpat" id="grad" checked>Gradient<br>
+      <input type="radio" name="colpat" id="bin">Binary<br>
+   
+      <label for="lowcol">Low Color (Black default)</label>
+      <input id="lowcol" type="color"><br>
+      <label for="highcol">High Color (White default)</label>
+      <input id="highcol" type="color" value="#ffffff">
+      <br>
+
+      <input type="checkbox" id="fall">Add Falloff Map<br><br>
+
+
+      <button onclick="generate()">Generate</button><br>
+      May take a few seconds depending on size
+      <br>
+      <canvas id="canvas" style="background-color: rgb(255, 255, 255)"></canvas>
+   </body>
+   <script src="index.js"></script>
 </html>

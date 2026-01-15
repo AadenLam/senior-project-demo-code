@@ -42,9 +42,9 @@ function perlin(x, y) { // returns values from [-1.0, 1.0]
    ];
    const dot = [
        dist[0].x * gr[Math.floor(y)][Math.floor(x)].x + dist[0].y * gr[Math.floor(y)][Math.floor(x)].y, // bottom left
-       dist[1].x * gr[Math.floor(y)][Math.ceil(x)].x + dist[1].y * gr[Math.floor(y)][Math.ceil(x)].y, // bottom right
-       dist[2].x * gr[Math.ceil(y)][Math.floor(x)].x + dist[2].y * gr[Math.ceil(y)][Math.floor(x)].y, // top left
-       dist[3].x * gr[Math.ceil(y)][Math.ceil(x)].x + dist[3].y * gr[Math.ceil(y)][Math.ceil(x)].y // top right
+       dist[1].x * gr[Math.floor(y)][Math.ceil(x) % 256].x + dist[1].y * gr[Math.floor(y)][Math.ceil(x) % 256].y, // bottom right
+       dist[2].x * gr[Math.ceil(y) % 256][Math.floor(x)].x + dist[2].y * gr[Math.ceil(y) % 256][Math.floor(x)].y, // top left
+       dist[3].x * gr[Math.ceil(y) % 256][Math.ceil(x) % 256].x + dist[3].y * gr[Math.ceil(y) % 256][Math.ceil(x) % 256].y // top right
    ];
    const x1 = lerp(dot[0], dot[1], x-Math.floor(x));
    const x2 = lerp(dot[2], dot[3], x-Math.floor(x));
@@ -55,21 +55,58 @@ function fade(t) {
    return 6 * Math.pow(t, 5) - 15 * Math.pow(t, 4) + 10 * Math.pow(t, 3);
 }
 
+let xsize, ysize, frq, seed, bin, low, high, lowCol, highCol, fall;
+function generate() {
+    xsize = document.getElementById("xsize").value;
+    ysize = document.getElementById("ysize").value;
+    frq = document.getElementById("frq").value;
+    seed = (document.getElementById("set").checked) ? document.getElementById("seed").value % 65536 : Math.floor(Math.random() * 65536);
+    bin = document.getElementById("bin").checked;
+    low = document.getElementById("lowcol").value;
+    high = document.getElementById("highcol").value;
+    lowCol = [parseInt(low.substring(1,3),16),parseInt(low.substring(3,5),16),parseInt(low.substring(5),16)];
+    highCol = [parseInt(high.substring(1,3),16),parseInt(high.substring(3,5),16),parseInt(high.substring(5),16)];
+    fall = document.getElementById("fall").checked;
+    canvas.width = xsize;
+    canvas.height = ysize;
+    for (let i = 0; i < ysize; i++) {
+        for (let j = 0; j < xsize; j++) {
+            ctx.fillStyle = color(perlin((j / frq + perm[Math.floor(seed / 256)]) % 256, (i / frq + perm[seed % 256]) % 256) * ((fall) ? falloff(j, i, xsize, ysize) : 1));
+            ctx.fillRect(j, i, 1, 1);
+        }
+    }
+}
 
-canvas.width = 2000;
-canvas.height = 2000;
-for (let i = 0; i < 2000; i++) {
-   for (let j = 0; j < 2000; j++) {
-       ctx.fillStyle = color(perlin(j / 100, i / 100));
-       ctx.fillRect(j, i, 1, 1);
-   }
+function falloff(x, y, w, h) {
+    const xRel = x / w;
+    const yRel = y / w;
+    const dist = Math.max(Math.abs(xRel-0.5),Math.abs(yRel-0.5));
+    if (dist > 0.3) {
+        return lerp(1, 0, dist * 5 - 1.5);
+    }
+    return 1;
 }
 
 
 function color(x) {
-   const y = Math.floor(256 * x).toString(16);
-   return "#" + y + y + y;
+    if (bin) {
+        if (x > 0.5) {
+            return high;
+        }
+        return low;
+    }
+   const col = [
+    Math.floor(lerp(lowCol[0],highCol[0],x)),
+    Math.floor(lerp(lowCol[1],highCol[1],x)),
+    Math.floor(lerp(lowCol[2],highCol[2],x))];
+    return "#" + rgbStr(col[0]) + rgbStr(col[1]) + rgbStr(col[2]);
 }
 function lerp(a, b, c) {
    return a + (b - a) * c;
+}
+function rgbStr(x) {
+    if (x < 16) {
+        return "0" + x.toString(16);
+    }
+    return x.toString(16);
 }
